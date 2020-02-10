@@ -2,6 +2,9 @@ const express = require('express')
 const chalk=require('chalk')
 const path=require('path')
 const hbs = require('hbs')
+const geocode=require('./utils/geocode')
+const forecast=require('./utils/forecast')
+const port=process.env.PORT||3001
 
 const app=express();
 
@@ -44,10 +47,33 @@ app.get('/help',(req,res)=>{
 
 
 app.get('/weather',(req,res)=>{
-  res.send({
-    forecast:'Forecast',
-    location:'location'
+  if(!req.query.address){
+    return res.send({
+        error:'Address not found'
+    })
+  }
+  geocode(req.query.address,(error,{latitude,longitude,location}={})=>{
+    if(error){      
+      return res.send({
+        error
+      })
+    }
+    forecast(latitude,longitude, (error, forecast) => {
+      if(error){
+        return res.send({
+          error
+        })
+      }
+      res.send({
+        location,
+        forecast
+      })
+    })
   })
+  // res.send({
+  //   forecast:'Forecast',
+  //   location:'location'
+  // })
 })
 
 app.get('/help/*',(req,res)=>{
@@ -66,6 +92,6 @@ app.get('*',(req,res)=>{
   })
 })
 
-app.listen(3001,()=>{
-  console.log(chalk.magenta('Server is up on port : '+chalk.yellow( 3001)))
+app.listen(port,()=>{
+  console.log(chalk.magenta('Server is up on port : '+chalk.yellow( port)))
 })
