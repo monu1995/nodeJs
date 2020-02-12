@@ -9,7 +9,14 @@ const taskSchema=mongoose.Schema({
   completed:{
     type:Boolean,
     default:false
+  },
+  owner:{
+    type:mongoose.Schema.Types.ObjectId,
+    required:true,
+    ref:'User'
   }
+},{
+  timestamps:true
 })
 
 taskSchema.pre('save',function(next){
@@ -20,6 +27,6 @@ taskSchema.pre('save',function(next){
   next()
 })
 
-const Task=mongoose.model('task',taskSchema)
+const Task=mongoose.model('Task',taskSchema)
 
 module.exports=Task
